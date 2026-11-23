@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Marks Calculator</title>
+</head>
+<body bgcolor="#eeeeee" text="#222222">
+
+<center>
+<font face="Georgia, 'Times New Roman', serif">
+<br>
+
+<!-- FORM VIEW -->
+<div id="formView">
+  <table width="500" cellpadding="12" cellspacing="0" border="1" bordercolor="#999999" bgcolor="#ffffff">
+    <tr bgcolor="#1f3a5f">
+      <td align="center">
+        <font color="#ffffff" size="5"><b>Student Marks Calculator</b></font>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <b>Name</b><br><br>
+        <input type="text" id="name" size="45" placeholder="e.g. Abdullah Shiham">
+      </td>
+    </tr>
+
+    <tr bgcolor="#f7f7f7">
+      <td>
+        <b>Gender</b><br><br>
+        <input type="radio" name="gender" id="male" value="Male"> <label for="male">Male</label>
+        &nbsp;&nbsp;&nbsp;
+        <input type="radio" name="gender" id="female" value="Female"> <label for="female">Female</label>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <b>Course</b><br><br>
+        <input type="radio" name="course" id="hndit" value="HNDIT"> <label for="hndit">HNDIT</label>
+        &nbsp;&nbsp;&nbsp;
+        <input type="radio" name="course" id="hndse" value="HNDSE"> <label for="hndse">HNDSE</label>
+        &nbsp;&nbsp;&nbsp;
+        <input type="radio" name="course" id="hndja" value="HNDJA"> <label for="hndja">HNDJA</label>
+      </td>
+    </tr>
+
+    <tr bgcolor="#f7f7f7">
+      <td>
+        <table width="100%" cellpadding="8" cellspacing="0" border="1" bordercolor="#999999" bgcolor="#ffffff">
+          <tr bgcolor="#d9e2ef">
+            <th align="left">Subject</th>
+            <th>Marks (0-100)</th>
+            <th>Grade</th>
+          </tr>
+          <tbody id="subjects"></tbody>
+        </table>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="center">
+        <button id="calcBtn"><b>Calculate</b></button>
+        <br><br>
+        <font color="#a00000"><span id="error"></span></font>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- RESULT VIEW -->
+<div id="resultView" hidden>
+  <table width="500" cellpadding="12" cellspacing="0" border="1" bordercolor="#999999" bgcolor="#ffffff">
+    <tr bgcolor="#1f3a5f">
+      <td align="center">
+        <font color="#ffffff" size="5"><b>Student Marks &amp; Grade Report</b></font>
+      </td>
+    </tr>
+
+    <tr bgcolor="#f7f7f7">
+      <td>
+        <b>Name:</b> <span id="rName"></span><br><br>
+        <b>Gender:</b> <span id="rGender"></span><br><br>
+        <b>Course:</b> <span id="rCourse"></span>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <table width="100%" cellpadding="8" cellspacing="0" border="1" bordercolor="#999999" bgcolor="#ffffff">
+          <tr bgcolor="#d9e2ef">
+            <th align="left">Subject</th>
+            <th>Marks (0-100)</th>
+            <th>Grade</th>
+          </tr>
+          <tbody id="rBody"></tbody>
+          <tr bgcolor="#f7f7f7">
+            <td colspan="2"><b>Average</b></td>
+            <td align="center"><b id="rAvg"></b></td>
+          </tr>
+          <tr bgcolor="#f7f7f7">
+            <td colspan="2"><b>Overall Grade</b></td>
+            <td align="center"><b id="rGrade"></b></td>
+          </tr>
+        </table>
+        <br>
+        <center><b>Total Marks: <span id="rTotal"></span></b></center>
+      </td>
+    </tr>
+
+    <tr bgcolor="#f7f7f7">
+      <td align="center">
+        <font color="#1b5e20"><span id="rMsg"></span></font>
+        <br><br>
+        <button id="backBtn"><b>Back</b></button>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<br>
+</font>
+</center>
+
+<script>
+  // Edit this list to add or rename subjects
+  var SUBJECTS = ["Machine Learning", "Computer Network", "Architecture"];
+
+  function getGrade(m) {
+    if (m >= 75) return "A";
+    if (m >= 65) return "B";
+    if (m >= 55) return "C";
+    if (m >= 35) return "S";
+    return "F";
+  }
+
+  // Classic dark grade colors using HTML <font color>
+  function colored(g) {
+    var c = { A: "#1b5e20", B: "#33691e", C: "#e65100", S: "#bf360c", F: "#b71c1c" };
+    return '<font color="' + c[g] + '"><b>' + g + '</b></font>';
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  // Build subject rows
+  var rows = "";
+  for (var i = 0; i < SUBJECTS.length; i++) {
+    rows += '<tr>' +
+      '<td>' + SUBJECTS[i] + '</td>' +
+      '<td align="center"><input type="number" min="0" max="100" size="6" placeholder="0-100" id="m' + i + '"></td>' +
+      '<td align="center" id="b' + i + '">-</td>' +
+      '</tr>';
+  }
+  $("subjects").innerHTML = rows;
+
+  // Live grade while typing
+  SUBJECTS.forEach(function (s, i) {
+    $("m" + i).addEventListener("input", function (e) {
+      var v = e.target.value;
+      $("b" + i).innerHTML = (v !== "" && v >= 0 && v <= 100) ? colored(getGrade(Number(v))) : "-";
+    });
+  });
+
+  function showError(msg) { $("error").textContent = msg; }
+
+  $("calcBtn").addEventListener("click", function () {
+    var name = $("name").value.trim();
+    var gender = document.querySelector('input[name="gender"]:checked');
+    var course = document.querySelector('input[name="course"]:checked');
+
+    if (!name) return showError("Please enter the student name.");
+    if (!gender) return showError("Please select a gender.");
+    if (!course) return showError("Please select a course.");
+
+    var nums = [];
+    for (var i = 0; i < SUBJECTS.length; i++) {
+      var v = $("m" + i).value;
+      if (v === "" || isNaN(v) || v < 0 || v > 100) {
+        return showError("Enter valid marks (0-100) for " + SUBJECTS[i] + ".");
+      }
+      nums.push(Number(v));
+    }
+
+    showError("");
+
+    var total = 0;
+    nums.forEach(function (n) { total += n; });
+    var avg = total / nums.length;
+
+    $("rName").textContent = name;
+    $("rGender").textContent = gender.value;
+    $("rCourse").textContent = course.value;
+
+    var body = "";
+    for (var j = 0; j < SUBJECTS.length; j++) {
+      body += '<tr><td>' + SUBJECTS[j] + '</td>' +
+              '<td align="center">' + nums[j] + '</td>' +
+              '<td align="center">' + colored(getGrade(nums[j])) + '</td></tr>';
+    }
+    $("rBody").innerHTML = body;
+
+    $("rAvg").textContent = avg.toFixed(2);
+    $("rGrade").innerHTML = colored(getGrade(avg));
+    $("rTotal").textContent = total + " / " + (nums.length * 100);
+    $("rMsg").textContent = name + "'s results calculated successfully.";
+
+    $("formView").hidden = true;
+    $("resultView").hidden = false;
+  });
+
+  $("backBtn").addEventListener("click", function () {
+    $("resultView").hidden = true;
+    $("formView").hidden = false;
+  });
+</script>
+</body>
+</html>
